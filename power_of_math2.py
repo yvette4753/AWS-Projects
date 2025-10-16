@@ -5,28 +5,37 @@ import math
 
 # import the AWS SDK (for Python the package name is boto3)
 import boto3
-# import two packages to help us with dates and date formatting
+# import packages for date/time formatting
 from time import gmtime, strftime
 
 # create a DynamoDB object using the AWS SDK
 dynamodb = boto3.resource('dynamodb')
-# use the DynamoDB object to select our table
-table = dynamodb.Table('PowerOfMathDatabase')
-# store the current time in a human readable format in a variable
+# replace 'YOUR_DYNAMODB_TABLE_NAME' with your actual table when using this code
+table = dynamodb.Table('YOUR_DYNAMODB_TABLE_NAME')
+
+# store the current time in a human-readable format
 now = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
 
-# define the handler function that the Lambda service will use an entry point
+# define the Lambda handler function
 def lambda_handler(event, context):
 
-# extract the two numbers from the Lambda service's event object
+    # extract the two numbers from the Lambda event object
     mathResult = math.pow(int(event['base']), int(event['exponent']))
 
-# write result and time to the DynamoDB table using the object we instantiated and save response in a variable
+    # write result and time to the DynamoDB table
     response = table.put_item(
         Item={
             'ID': str(mathResult),
-            'LatestGreetingTime':now
-            })
+            'LatestGreetingTime': now
+        }
+    )
+
+    # return a properly formatted JSON object
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Your result is ' + str(mathResult))
+    }
+
 
 # return a properly formatted JSON object
     return {
